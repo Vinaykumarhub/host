@@ -10,7 +10,7 @@ const port = process.env.PORT || 3000;
 // Middleware
 app.use(bodyParser.json());
 app.use(cors({
-  origin: 'https://your-frontend-domain.com', // Replace with your frontend URL
+  origin: 'https://vinaykumarhub.github.io/host/send-otp.html', // Replace with your frontend URL
 }));
 
 // Nodemailer Setup
