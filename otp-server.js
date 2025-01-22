@@ -10,15 +10,15 @@ const port = process.env.PORT || 3000;
 // Middleware
 app.use(bodyParser.json());
 app.use(cors({
-  origin: 'https://vinaykumarhub.github.io/host/send-otp.html', // Replace with your frontend URL
+  origin: 'https://vinaykumarhub.github.io', // Allow requests from the entire frontend domain
 }));
 
 // Nodemailer Setup
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'yadamma077@gmail.com',
-    pass: 'rqyj jibq nhmz fytw',
+    user: process.env.EMAIL_USER, // Use environment variable for email
+    pass: process.env.EMAIL_PASS, // Use environment variable for app password
   },
 });
 
@@ -33,14 +33,18 @@ app.post('/send-otp', (req, res) => {
     return res.status(400).json({ status: 'Invalid or missing email address.' });
   }
 
+  // Generate a 6-digit OTP
   const otp = Math.floor(100000 + Math.random() * 900000);
 
+  // Store OTP temporarily
   otps[email] = otp;
 
+  // Automatically delete OTP after 5 minutes
   setTimeout(() => {
     delete otps[email];
   }, 300000);
 
+  // Email message setup
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: email,
@@ -48,6 +52,7 @@ app.post('/send-otp', (req, res) => {
     text: `Your OTP is: ${otp}\nThis OTP will expire in 5 minutes.`,
   };
 
+  // Send the email
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
       console.error('Error sending OTP: ', error);
@@ -64,11 +69,12 @@ function validateEmail(email) {
   return emailRegex.test(email);
 }
 
-// Error Handling
+// Error Handling Middleware (404)
 app.use((req, res) => {
   res.status(404).json({ status: 'Endpoint not found' });
 });
 
+// Error Handling Middleware (500)
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ status: 'Internal Server Error' });
