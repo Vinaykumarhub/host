@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
-require('dotenv').config();
+require('dotenv').config(); // Load environment variables from .env file
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -10,15 +10,15 @@ const port = process.env.PORT || 3000;
 // Middleware
 app.use(bodyParser.json());
 app.use(cors({
-  origin: 'https://vinaykumarhub.github.io', // Allow requests from the entire frontend domain
+  origin: 'https://vinaykumarhub.github.io', // Allow requests from your frontend URL
 }));
 
 // Nodemailer Setup
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER, // Use environment variable for email
-    pass: process.env.EMAIL_PASS, // Use environment variable for app password
+    user: process.env.EMAIL_USER, // Email address from .env file
+    pass: process.env.EMAIL_PASS, // App password from .env file
   },
 });
 
@@ -29,6 +29,7 @@ const otps = {};
 app.post('/send-otp', (req, res) => {
   const { email } = req.body;
 
+  // Validate the email address
   if (!email || !validateEmail(email)) {
     return res.status(400).json({ status: 'Invalid or missing email address.' });
   }
@@ -46,13 +47,13 @@ app.post('/send-otp', (req, res) => {
 
   // Email message setup
   const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: email,
+    from: process.env.EMAIL_USER, // Sender's email address
+    to: email, // Recipient's email address
     subject: 'Your OTP for Verification',
     text: `Your OTP is: ${otp}\nThis OTP will expire in 5 minutes.`,
   };
 
-  // Send the email
+  // Send the OTP email
   transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
       console.error('Error sending OTP: ', error);
